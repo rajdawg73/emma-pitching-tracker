@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Emma Pitching Tracker v4</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: Arial, sans-serif; padding: 10px; background: #f7f7f7; }
+    h1 { font-size: 20px; }
+    nav button { margin: 5px; padding: 5px 10px; }
+    .hidden { display: none; }
+    .section { background: #fff; padding: 10px; margin-bottom: 10px; border-radius: 6px; }
+    label { display:block; margin-top:6px; }
+    input { padding: 4px; width: 100%; box-sizing: border-box; }
+    table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+    th, td { border: 1px solid #ccc; padding: 6px; text-align:center; }
+  </style>
+</head>
+<body>
+  <h1>Emma Pitching Tracker v4</h1>
+  <nav>
+    <button type="button" data-tab="log">Log Session</button>
+    <button type="button" data-tab="dashboard">Dashboard</button>
+  </nav>
+
+  <div id="log" class="tab">
+    <div class="section">
+      <h3>Spin Work</h3>
+      <label>Clean Drop Spins (x/y): <input id="dropSpins"></label>
+      <label>Clean Change Spins (x/y): <input id="changeSpins"></label>
+    </div>
+    <div class="section">
+      <h3>Lane Targets</h3>
+      <label>Lane 1 (x/y): <input id="lane1"></label>
+      <label>Lane 2 (x/y): <input id="lane2"></label>
+      <label>Lane 3 (x/y): <input id="lane3"></label>
+    </div>
+    <div class="section">
+      <h3>Accuracy</h3>
+      <label>Low-In (x/y): <input id="lowIn"></label>
+      <label>Low-Out (x/y): <input id="lowOut"></label>
+      <label>Change Targets (x/y): <input id="changeTargets"></label>
+    </div>
+    <div class="section">
+      <h3>Pressure Test</h3>
+      <label>Pressure Strikes (x/y): <input id="pressure"></label>
+    </div>
+    <div class="section">
+      <button type="button" id="saveBtn">Save Session</button>
+    </div>
+  </div>
+
+  <div id="dashboard" class="tab hidden">
+    <h3>Recent Sessions</h3>
+    <table>
+      <thead><tr><th>Date</th><th>Total</th><th>Strike %</th></tr></thead>
+      <tbody id="sessionTable"></tbody>
+    </table>
+  </div>
+
+<script>
+function parseEntry(str){
+  if(!str) return [0,0];
+  const parts = str.split('/');
+  if(parts.length!==2) return [0,0];
+  const made=parseInt(parts[0])||0;
+  const att=parseInt(parts[1])||0;
+  return [made,att];
+}
+function computeTotals(data){
+  let total=0, strikeMade=0, strikeAtt=0;
+  const spinFields=["dropSpins","changeSpins","lane1","lane2","lane3"];
+  spinFields.forEach(f=>{ let [m,a]=parseEntry(data[f]); total+=a; });
+  const strikeFields=["lowIn","lowOut","changeTargets","pressure"];
+  strikeFields.forEach(f=>{ let [m,a]=parseEntry(data[f]); total+=a; strikeMade+=m; strikeAtt+=a; });
+  return {total: total, strikePct: strikeAtt? Math.round((strikeMade/strikeAtt)*100):0};
+}
+function saveSession(){
+  const data={};
+  ["dropSpins","changeSpins","lane1","lane2","lane3","lowIn","lowOut","changeTargets","pressure"].forEach(id=>{
+    data[id]=document.getElementById(id).value.trim();
+  });
+  const totals=computeTotals(data);
+  const session={date:new Date().toLocaleDateString(), total:totals.total, strikePct:totals.strikePct, ...data};
+  let sessions=JSON.parse(localStorage.getItem("sessions")||"[]");
+  sessions.unshift(session);
+  localStorage.setItem("sessions",JSON.stringify(sessions));
+  renderDashboard();
+  alert("Saved!");
+}
+function renderDashboard(){
+  let sessions=JSON.parse(localStorage.getItem("sessions")||"[]");
+  const tbody=document.getElementById("sessionTable");
+  tbody.innerHTML="";
+  sessions.slice(0,10).forEach(s=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML=`<td>${s.date}</td><td>${s.total}</td><td>${s.strikePct}%</td>`;
+    tbody.appendChild(tr);
+  });
+}
+document.getElementById("saveBtn").addEventListener("click",saveSession);
+document.querySelectorAll("nav button").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    document.querySelectorAll(".tab").forEach(tab=>tab.classList.add("hidden"));
+    document.getElementById(btn.dataset.tab).classList.remove("hidden");
+    if(btn.dataset.tab==="dashboard") renderDashboard();
+  });
+});
+renderDashboard();
+</script>
+</body>
+</html>
