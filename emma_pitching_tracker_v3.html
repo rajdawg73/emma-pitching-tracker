@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Emma Pitching Tracker</title>
+<style>
+  :root{--bg:#0f172a;--panel:#111827;--ink:#e5e7eb;--muted:#9ca3af;--accent:#60a5fa;}
+  *{box-sizing:border-box}
+  body{margin:0;background:linear-gradient(180deg,#0b1226,#0f172a);color:var(--ink);
+       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial}
+  header{position:sticky;top:0;z-index:5;background:rgba(15,23,42,.9);
+         border-bottom:1px solid #1f2937;backdrop-filter:blur(8px);
+         display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:.75rem 1rem}
+  h1{font-size:1rem;margin:0}
+  .tabs{display:flex;gap:.5rem;flex-wrap:wrap}
+  .tabs button{border:1px solid #1f2937;background:#0b1226;color:var(--ink);padding:.45rem .7rem;border-radius:.6rem;font-weight:600;cursor:pointer}
+  .tabs button.active{background:var(--accent);color:#001;border-color:transparent}
+  main{max-width:1100px;margin:0 auto;padding:1rem;display:grid;gap:1rem}
+  .card{background:var(--panel);border:1px solid #1f2937;border-radius:12px;padding:1rem}
+  .hidden{display:none}
+  .grid{display:grid;gap:.75rem}
+  .grid.two{grid-template-columns:repeat(2,1fr)}
+  .grid.three{grid-template-columns:repeat(3,1fr)}
+  label{font-size:.9rem;color:var(--muted);display:block;margin-bottom:.25rem}
+  input,select,textarea{width:100%;padding:.6rem;border-radius:.6rem;border:1px solid #374151;background:#0b1226;color:var(--ink)}
+  textarea{min-height:80px}
+  .row{display:flex;gap:.5rem;flex-wrap:wrap}
+  .btn{background:var(--accent);border:0;color:#001;font-weight:700;padding:.6rem .9rem;border-radius:.6rem;cursor:pointer}
+  .btn.outline{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+  table{width:100%;border-collapse:collapse}
+  th,td{padding:.5rem;border-bottom:1px solid #1f2937;text-align:center}
+  th{color:var(--muted)}
+  .hint{font-size:.85rem;color:var(--muted)}
+</style>
+</head>
+<body>
+<header>
+  <h1>Emma Pitching Tracker</h1>
+  <div class="tabs">
+    <button type="button" data-view="dashboard" class="active">Dashboard</button>
+    <button type="button" data-view="logA">Log Bullpen A</button>
+    <button type="button" data-view="logB">Log Bullpen B</button>
+    <button type="button" data-view="nightly">Nightly Routine</button>
+    <button type="button" data-view="data">Data</button>
+  </div>
+</header>
+
+<main>
+  <section id="dashboard" class="card">
+    <h2 style="margin-top:0">Overview</h2>
+    <div id="kpis" class="grid three">
+      <div class="card"><div class="hint">This Month Strike %</div><h3 id="kpiStrike">—</h3></div>
+      <div class="card"><div class="hint">ABs Won % (B)</div><h3 id="kpiABs">—</h3></div>
+      <div class="card"><div class="hint">Change Practice Clean %</div><h3 id="kpiChange">—</h3></div>
+    </div>
+    <div class="grid two" style="margin-top:1rem">
+      <div class="card">
+        <h3 style="margin-top:0">Recent Sessions</h3>
+        <table id="recent"><thead><tr><th>Date</th><th>Type</th><th>Strike %</th><th>Notes</th></tr></thead><tbody></tbody></table>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">Monthly Averages</h3>
+        <table id="avg"><thead><tr><th>Metric</th><th>Avg</th></tr></thead><tbody></tbody></table>
+      </div>
+    </div>
+  </section>
+
+  <section id="logA" class="card hidden">
+    <h2 style="margin-top:0">Bullpen A – Command & Precision (25–30 min)</h2>
+    <p class="hint">Tempo: 60% → 100%. Spin → lanes → accuracy → compete.</p>
+    <form id="formA">
+      <div class="grid three">
+        <div><label>Date</label><input type="date" name="date" required></div>
+        <div><label>Total Pitches</label><input type="number" name="total" min="1" placeholder="50" required></div>
+        <div><label>Overall Strike %</label><input type="number" name="strike" min="0" max="100" placeholder="%" required></div>
+      </div>
+      <div class="grid two">
+        <div class="card">
+          <h3>Spin Purity (5 min)</h3>
+          <div class="hint">12 pitches @ 70–80%</div>
+          <label>Clean Drop Spins</label><input type="number" name="cleanDropA" min="0" max="12">
+          <label>Clean Change Spins</label><input type="number" name="cleanChgA" min="0" max="12">
+          <label>Notes</label><input type="text" name="notesA" placeholder="tilt? corrections?">
+        </div>
+        <div class="card">
+          <h3>Power Line Lanes (8 min)</h3>
+          <div class="hint">5 middle + 5 inside + 5 outside @ 85%</div>
+          <label>Middle (out of 5)</label><input type="number" name="midA" min="0" max="5">
+          <label>Inside (out of 5)</label><input type="number" name="inA" min="0" max="5">
+          <label>Outside (out of 5)</label><input type="number" name="outA" min="0" max="5">
+        </div>
+      </div>
+      <div class="grid two">
+        <div class="card">
+          <h3>Location/Accuracy (8–9 min)</h3>
+          <div class="hint">5 low-in drops + 5 low-out drops + 5–8 changes @ 90%</div>
+          <label>Low-In Drops (out of 5)</label><input type="number" name="lowInA" min="0" max="5">
+          <label>Low-Out Drops (out of 5)</label><input type="number" name="lowOutA" min="0" max="5">
+          <label>Change Targets (out of 8)</label><input type="number" name="chgTargetsA" min="0" max="8">
+        </div>
+        <div class="card">
+          <h3>Competitive Finish (3–4 min)</h3>
+          <div class="hint">5–8 pitches @ 100%</div>
+          <label>Pressure Strikes</label><input type="number" name="pressureA" min="0" max="8">
+          <label>Go-To Pitch</label>
+          <select name="gotoA"><option>Drop</option><option>Change</option></select>
+          <label>Notes</label><input type="text" name="notesA2" placeholder="poise, breath, reset">
+        </div>
+      </div>
+      <div class="row">
+        <button class="btn" type="submit">Save Bullpen A</button>
+        <button class="btn outline" type="button" id="resetA">Reset</button>
+      </div>
+    </form>
+  </section>
+
+  <section id="logB" class="card hidden">
+    <h2 style="margin-top:0">Bullpen B – Game/Pressure (25–30 min)</h2>
+    <p class="hint">Sequence → ABs → pressure → closer. Build to 100%.</p>
+    <form id="formB">
+      <div class="grid three">
+        <div><label>Date</label><input type="date" name="date" required></div>
+        <div><label>Total Pitches</label><input type="number" name="total" min="1" placeholder="50" required></div>
+        <div><label>Overall Strike %</label><input type="number" name="strike" min="0" max="100" placeholder="%" required></div>
+      </div>
+      <div class="grid two">
+        <div class="card">
+          <h3>Sequence Builder (~20 pitches)</h3>
+          <div class="hint">@ 85–90%</div>
+          <label>Combos Executed (out of 6)</label><input type="number" name="combosB" min="0" max="6">
+          <label>Total Pitches</label><input type="number" name="seqTotalB" min="0" max="24">
+          <label>Notes</label><input type="text" name="seqNotesB" placeholder="sequence ideas, hitter types">
+        </div>
+        <div class="card">
+          <h3>Simulated At-Bats (30 pitches)</h3>
+          <div class="hint">@ 90–95%</div>
+          <label>ABs Won (out of 10)</label><input type="number" name="absWonB" min="0" max="10">
+          <label>Called Mix Felt Good?</label><select name="mixFeelB"><option>Yes</option><option>No</option></select>
+          <label>Notes</label><input type="text" name="absNotesB">
+        </div>
+      </div>
+      <div class="grid two">
+        <div class="card">
+          <h3>Pressure Situations (15 pitches)</h3>
+          <div class="hint">@ 95–100%</div>
+          <label>3–2 Count Strikes (5)</label><input type="number" name="threeTwoB" min="0" max="5">
+          <label>2–0 Comebacks (5)</label><input type="number" name="twoOhB" min="0" max="5">
+          <label>Bases Loaded Exec (5)</label><input type="number" name="basesB" min="0" max="5">
+        </div>
+        <div class="card">
+          <h3>Closer (5–8 pitches)</h3>
+          <div class="hint">@ 100%</div>
+          <label>Pressure Strikes</label><input type="number" name="pressureB" min="0" max="8">
+          <label>Go-To Pitch</label><select name="gotoB"><option>Drop</option><option>Change</option></select>
+          <label>Notes</label><input type="text" name="notesB">
+        </div>
+      </div>
+      <div class="row">
+        <button class="btn" type="submit">Save Bullpen B</button>
+        <button class="btn outline" type="button" id="resetB">Reset</button>
+      </div>
+    </form>
+  </section>
+
+  <section id="nightly" class="card hidden">
+    <h2 style="margin-top:0">Nightly Routine (10–12 min)</h2>
+    <p class="hint">Spinner (drop-only) + change-up release + stride lanes + optional shadow reps.</p>
+    <form id="formN">
+      <div class="grid three">
+        <div><label>Date</label><input type="date" name="date" required></div>
+        <div><label>Completed?</label><select name="done"><option>Yes</option><option>No</option></select></div>
+        <div><label>Notes</label><input type="text" name="notes" placeholder="feel, cues, soreness"></div>
+      </div>
+      <div class="grid two">
+        <div class="card">
+          <h3>Spinner – Drop Spin</h3>
+          <div class="hint">10–12 spins @ 70%</div>
+          <label>Spins Done</label><input type="number" name="spinCount" min="0" max="30">
+          <label>“Clean” Spins</label><input type="number" name="spinClean" min="0" max="30">
+          <label>Tilt Issues?</label><select name="tilt"><option>No</option><option>Yes</option></select>
+        </div>
+        <div class="card">
+          <h3>Change-Up – Release</h3>
+          <div class="hint">10–12 to glove/pillow @ 60–70%</div>
+          <label>Reps Done</label><input type="number" name="chgCount" min="0" max="30">
+          <label>“Float” Success</label><input type="number" name="chgClean" min="0" max="30">
+          <label>Bullet Spin?</label><select name="bullet"><option>No</option><option>Yes</option></select>
+        </div>
+      </div>
+      <div class="grid two">
+        <div class="card">
+          <h3>Stride Footwork</h3>
+          <div class="hint">5 middle + 5 inside + 5 outside</div>
+          <label>Middle OK (5)</label><input type="number" name="midN" min="0" max="5">
+          <label>Inside OK (5)</label><input type="number" name="inN" min="0" max="5">
+          <label>Outside OK (5)</label><input type="number" name="outN" min="0" max="5">
+        </div>
+        <div class="card">
+          <h3>Optional Shadow Reps</h3>
+          <div class="hint">10 drops + 10 changes (no release)</div>
+          <label>Drops Done</label><input type="number" name="dropsN" min="0" max="30">
+          <label>Changes Done</label><input type="number" name="changesN" min="0" max="30">
+          <label>Mirror Used?</label><select name="mirror"><option>Yes</option><option>No</option></select>
+        </div>
+      </div>
+      <div class="row">
+        <button class="btn" type="submit">Save Nightly</button>
+        <button class="btn outline" type="button" id="resetN">Reset</button>
+      </div>
+    </form>
+  </section>
+
+  <section id="data" class="card hidden">
+    <h2 style="margin-top:0">Data & Export</h2>
+    <div class="row" style="margin-bottom:.5rem">
+      <button type="button" class="btn" id="exportCsv">Export CSV</button>
+      <button type="button" class="btn outline" id="clearAll">Clear All Data</button>
+    </div>
+    <div class="grid two">
+      <div>
+        <h3>Bullpen A Entries</h3>
+        <table id="tableA"><thead></thead><tbody></tbody></table>
+      </div>
+      <div>
+        <h3>Bullpen B Entries</h3>
+        <table id="tableB"><thead></thead><tbody></tbody></table>
+      </div>
+    </div>
+    <div>
+      <h3>Nightly Routine Entries</h3>
+      <table id="tableN"><thead></thead><tbody></tbody></table>
+    </div>
+  </section>
+</main>
+
+<script>
+(function(){
+  const tabs = document.querySelectorAll('.tabs button');
+  const sections = ['dashboard','logA','logB','nightly','data'];
+  function show(view){
+    sections.forEach(id => document.getElementById(id).classList.toggle('hidden', id!==view));
+    tabs.forEach(b => b.classList.toggle('active', b.dataset.view===view));
+    if(view==='dashboard') renderDashboard();
+    if(view==='data') renderTables();
+  }
+  tabs.forEach(b=> b.addEventListener('click', ()=> show(b.dataset.view)));
+  show('dashboard');
+
+  const get = k => JSON.parse(localStorage.getItem(k) || '[]');
+  const set = (k,v) => localStorage.setItem(k, JSON.stringify(v));
+
+  const formA = document.getElementById('formA');
+  const formB = document.getElementById('formB');
+  const formN = document.getElementById('formN');
+
+  formA.addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const fd = Object.fromEntries(new FormData(formA).entries());
+    fd.type='A';
+    const list=get('bullpenA'); list.unshift(fd); set('bullpenA',list);
+    formA.reset(); alert('Saved Bullpen A'); renderDashboard();
+  });
+  document.getElementById('resetA').onclick = ()=> formA.reset();
+
+  formB.addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const fd = Object.fromEntries(new FormData(formB).entries());
+    fd.type='B';
+    const list=get('bullpenB'); list.unshift(fd); set('bullpenB',list);
+    formB.reset(); alert('Saved Bullpen B'); renderDashboard();
+  });
+  document.getElementById('resetB').onclick = ()=> formB.reset();
+
+  formN.addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const fd = Object.fromEntries(new FormData(formN).entries());
+    const list=get('nightly'); list.unshift(fd); set('nightly',list);
+    formN.reset(); alert('Saved Nightly'); renderDashboard();
+  });
+  document.getElementById('resetN').onclick = ()=> formN.reset();
+
+  const pct = (num,den)=>{
+    num=Number(num); den=Number(den);
+    if(!den || isNaN(num) || isNaN(den)) return null;
+    return Math.round((num/den)*100);
+  };
+  const avg = arr => {
+    const nums = arr.map(Number).filter(n=>!isNaN(n));
+    if(!nums.length) return null;
+    return Math.round(nums.reduce((a,b)=>a+b,0)/nums.length);
+  };
+
+  function renderDashboard(){
+    const A=get('bullpenA'), B=get('bullpenB'), N=get('nightly');
+    const month = new Date().toISOString().slice(0,7);
+    const inMonth = d => (d?.date||'').startsWith(month);
+
+    const strikeA = avg(A.filter(inMonth).map(x=>x.strike));
+    const strikeB = avg(B.filter(inMonth).map(x=>x.strike));
+    const strikeAvg = avg([strikeA, strikeB].filter(v=>v!=null));
+
+    const changeClean = avg(N.filter(inMonth).map(x=>{
+      const denom = Number(x.chgCount||0); const num = Number(x.chgClean||0);
+      return denom? Math.round((num/denom)*100) : null;
+    }).filter(v=>v!=null));
+
+    document.getElementById('kpiStrike').textContent = strikeAvg!=null? (strikeAvg+'%') : '—';
+    const abAvg = avg(B.filter(inMonth).map(x=>x.absWonB));
+    document.getElementById('kpiABs').textContent = abAvg!=null? (abAvg+' / 10') : '—';
+    document.getElementById('kpiChange').textContent = changeClean!=null? (changeClean+'%') : '—';
+
+    const recent = [...A.map(x=>({...x,_type:'A'})), ...B.map(x=>({...x,_type:'B'}))]
+                    .sort((a,b)=> (b.date||'').localeCompare(a.date||''))
+                    .slice(0,6);
+    const tbody = document.querySelector('#recent tbody');
+    tbody.innerHTML = recent.map(x=> `<tr><td>${x.date||''}</td><td>${x._type}</td><td>${x.strike||''}%</td><td>${x.notesA||x.notesA2||x.notesB||''}</td></tr>`).join('')
+                   || `<tr><td colspan="4" class="hint">No entries yet</td></tr>`;
+
+    const avgRows = [
+      ['Strike % (this month)', strikeAvg!=null? strikeAvg+'%':'—'],
+      ['ABs Won (B, avg out of 10)', abAvg!=null? abAvg:'—'],
+      ['Nightly Change “clean %”', changeClean!=null? changeClean+'%':'—']
+    ];
+    document.querySelector('#avg tbody').innerHTML = avgRows.map(r=> `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('');
+  }
+
+  function renderTable(sel, rows, cols){
+    const table = document.querySelector(sel);
+    table.querySelector('thead').innerHTML = `<tr>${cols.map(c=> `<th>${c}</th>`).join('')}</tr>`;
+    table.querySelector('tbody').innerHTML = rows.map(r=> `<tr>${cols.map(c=> `<td>${r[c] || ''}</td>`).join('')}</tr>`).join('')
+      || `<tr><td colspan="${cols.length}" class="hint">No entries</td></tr>`;
+  }
+  function renderTables(){
+    const A=get('bullpenA'), B=get('bullpenB'), N=get('nightly');
+    renderTable('#tableA', A, ['date','total','strike','cleanDropA','cleanChgA','midA','inA','outA','lowInA','lowOutA','chgTargetsA','pressureA','gotoA','notesA','notesA2']);
+    renderTable('#tableB', B, ['date','total','strike','combosB','seqTotalB','absWonB','mixFeelB','threeTwoB','twoOhB','basesB','pressureB','gotoB','notesB']);
+    renderTable('#tableN', N, ['date','done','spinCount','spinClean','tilt','chgCount','chgClean','bullet','midN','inN','outN','dropsN','changesN','mirror','notes']);
+  }
+
+  document.getElementById('clearAll').addEventListener('click', ()=>{
+    if(confirm('Clear all stored data?')){
+      ['bullpenA','bullpenB','nightly'].forEach(k=> localStorage.removeItem(k));
+      renderDashboard(); renderTables();
+    }
+  });
+
+  document.getElementById('exportCsv').addEventListener('click', ()=>{
+    const A=get('bullpenA'), B=get('bullpenB'), N=get('nightly');
+    function toCSV(rows){
+      if(!rows.length) return 'No data';
+      const cols = Object.keys(rows[0]);
+      const head = cols.join(',');
+      const body = rows.map(r=> cols.map(c=> JSON.stringify(r[c] || '')).join(',')).join('\n');
+      return head + '\n' + body;
+    }
+    const csv = ['--- Bullpen A ---', toCSV(A), '--- Bullpen B ---', toCSV(B), '--- Nightly ---', toCSV(N)].join('\n');
+    const blob = new Blob([csv], {type:'text/csv'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href=url; a.download='emma_pitching_data.csv'; a.click();
+    setTimeout(()=> URL.revokeObjectURL(url), 5000);
+  });
+
+  renderDashboard();
+})();
+</script>
+</body>
+</html>
